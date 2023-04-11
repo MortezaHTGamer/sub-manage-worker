@@ -5,6 +5,10 @@ const myConfigs = "vless://....";
 const replaceDomain = 'subdomain.domain.website';
 //اگر از اسم کانفیگ در کانکشن استفاده میکنید اینجا مشخص کنید تا با اسم اپراتور ها جایگزین بشه اینطوری راحتر میشه فهمید چه کانکشنی برای چه اپراتوری هست
 const replaceName = 'myconnection';
+//اسم SNI که در داخل کانفیگ با یک سابدامین تولید شده رندوم برای جلوگیری از فیلتر شدن استفاده میشه
+const replaceSNI = 'subdomain.domain.website';
+//دامین اصلی که بر همون اساس سابدامین رندوم تولید بشه  
+const domian = 'domain.website';
 // بر اساس پارامتر ارسالی در درخواست اگر مقدار آن true باشد کاربر فقط از آپی های که خودش ارسال کرده استفاده میکنه
 //https://test.workers.dev/sub?user=USERNAME&useOwnList=true
 let useOwnList = false;
@@ -94,7 +98,10 @@ async function GetConfigs(user, env) {
         }
 
         for (const ip of cleanIPPerOperator[key]) {
-            let generated = myConfigs.replace('@' + replaceDomain, '@' + ip).replace('#' + replaceName, '#' + key);
+            let generated = myConfigs
+                .replace('@' + replaceDomain, '@' + ip)
+                .replace('#' + replaceName, '#' + key)
+                .replace('sni=' + replaceSNI, RandomString(8) + '.' + domian);
             newConfigs.push(generated);
         }
 
@@ -110,4 +117,16 @@ function getParameterByName(name, url) {
     if (!results) return "";
     if (!results[2]) return "";
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+function RandomString(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        counter += 1;
+    }
+    return result;
 }
